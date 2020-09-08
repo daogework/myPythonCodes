@@ -10,7 +10,7 @@ _class2= compile("public class {classname} {")
 _ctor= compile("{}public {ctor}() {")
 _ctorparam= compile("{}public {ctor}({param}) {")
 _v_1= compile("        {v1} = {v2};")
-__findlist= compile("        {v1} = {v2};")
+__findlist= compile("{}new List<{Type}>()")
 
 
 
@@ -72,8 +72,14 @@ def process(index, line):
         v1 = r['v1']
         v2 = r['v2']
         s = '        self.'+v1+' = '+v2+'\n'
-
+        r = __findlist.parse(s)
+        if not r is None:
+            listtype = r['Type']
+            liststr = 'new List<'+listtype+'>()'
+            s=s.replace(liststr,'{}')
         return s
+    if line=='    }':
+        return '    end'
     return line
 
 for index, line in enumerate(lines):
