@@ -1,4 +1,5 @@
 from parse import compile
+from parse import findall
 import sys
 
 orig_stdout = sys.stdout
@@ -25,6 +26,7 @@ _public_member= compile("{space}public {type} {member_name} = {value};")
 _public_member_empty= compile("{space}public {type} {member_name};")
 _get_set = compile("{space}public {type} {value_name} {")
 
+_msgcenter_event = compile("{space}MessageCenter.Instance.{}({}, {callbackfunc});")
 
 fout = open('H:\\python脚本\\__fortest/out.lua', 'w')
 #sys.stdout = fout
@@ -57,6 +59,22 @@ def process(index, line, lines):
     if passCount>0:
         passCount-=1
         return ''
+
+    r = _msgcenter_event.parse(line)
+    if not r is None:
+        line = line.replace('Instance.','Instance:')
+        callbackfunc = r['callbackfunc']
+        space=r['space']
+        if 'AddListener' in line:
+            oldname = 'old'+callbackfunc
+            localold = space+'local '+oldname+' = '+ 'self.'+callbackfunc +'\n'
+            newfunc = space+'self.'+callbackfunc+' = function(msg) '+oldname+'(self, msg) end\n'
+            line = line.replace(callbackfunc,'self.'+callbackfunc)
+            return localold+newfunc+line+'\n'
+        else:
+            line = line.replace(callbackfunc,'self.'+callbackfunc)
+        return line
+
     r = _using.parse(line)
     r2 = _using2.parse(line)
     if not r is None or not r2 is None:
