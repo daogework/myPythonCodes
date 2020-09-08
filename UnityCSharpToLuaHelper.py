@@ -20,15 +20,18 @@ _ctor= compile("{space}public {ctor}() {")
 _ctorparam= compile("{space}public {ctor}({param}) {")
 _var_1= compile("{space}var {v1} = {v2};")
 _v_1= compile("        {v1} = {v2};")
-__findlist= compile("{}new List<{Type}>()")
+__findlist= compile("{}new List<{Type}>();")
 _private_member= compile("{space}private {type} {member_name} = {value};")
 _public_member= compile("{space}public {type} {member_name} = {value};")
 _public_member_empty= compile("{space}public {type} {member_name};")
 _get_set = compile("{space}public {type} {value_name} {")
+_lambda_param = compile("{}(({param}) => {")
 
 _msgcenter_event = compile("{space}MessageCenter.Instance.{}({}, {callbackfunc});")
+_ReferenceEquals = compile("{}ReferenceEquals({value}, null){}")
 
-fout = open('H:\\python脚本\\__fortest/out.lua', 'w')
+
+#fout = open('H:\\python脚本\\__fortest/out.lua', 'w')
 #sys.stdout = fout
 
 total = 0
@@ -120,6 +123,18 @@ def process(index, line, lines):
             param = paserParam(param)
             space=r['space']
             return space+'ctor = function(self,'+param+')\n'
+
+    r = _lambda_param.parse(line)
+    if not r is None:
+        passCount = count_get_set_line(index, lines)
+        lambdastr = find_end_of_parantheses(index, lines)
+        param = r['param']
+        lambdkeyastr = '('+param+') => {'
+        funcstr = 'function('+param+')'
+        lambdastr = lambdastr.replace(lambdkeyastr,funcstr)
+        k = lambdastr.rfind("}")
+        lambdastr = lambdastr[:k] + "end" + lambdastr[k+1:]
+        return lambdastr
     
     r = _var_1.parse(line)
     if not r is None:
@@ -136,16 +151,24 @@ def process(index, line, lines):
 
     r = _v_1.parse(line)
     if not r is None:
+        space = ''
+        for b in line:
+            if b==' ':
+                space+=b
+            else:
+                break
         v1 = r['v1']
         v2 = r['v2']
-        s = '        self.'+v1+' = '+v2+'\n'
-        r = __findlist.parse(s)
+        s = 'self.'+v1+'='+v2+'\n'
+        s = s.replace(' ','')
+        s = s.replace('=',' = ')
+        r = __findlist.parse(line)
         if not r is None:
             listtype = r['Type']
-            liststr = 'new List<'+listtype+'>()'
+            liststr = 'newList<'+listtype+'>()'
             s=s.replace(liststr,'{}')
         
-        return s
+        return space+s
     
     r = _private_member.parse(line)
     if not r is None:
@@ -172,6 +195,15 @@ def process(index, line, lines):
         getstr = find_get(index+1, lines)
         setstr = find_set(index+1, lines, value_name)
         return space+value_name+' = {\n' + getstr + setstr+space+'}\n'
+    
+    r = _ReferenceEquals.parse(line)
+    if not r is None:
+        value = r['value']
+        originalstr = 'ReferenceEquals('+value+', null)'
+        newstr = '('+value+'==nil)'
+        line = line.replace(originalstr, newstr)
+        return line
+
     if line.startswith('    }'):
         return '    end,\n'
     return line
@@ -181,14 +213,15 @@ def count_get_set_line(index, lines):
     lineCounter = 0
     isFoundFirst = False
     for lineindex in range(index,len(lines)):
-        
         line = lines[lineindex]
-        if '{' in line:
-            isFoundFirst = True
-            counter+=1
-        if '}' in line:
-            isFoundFirst = True
-            counter-=1
+        for s in line:
+            if s=='{':
+                counter+=1
+                isFoundFirst = True
+        for s in line:
+            if s=='}' and isFoundFirst:
+                counter-=1
+
         if isFoundFirst and counter==0:
             break
         lineCounter+=1
@@ -252,12 +285,112 @@ def paserFunc(line, paser, paserparam):
             return space+funcname+' = function(self,'+param+')\n'  
     return 'notfound'
 
+
+def replaceByIndex(s, index, newstring):
+     return s[:index] + newstring + s[index + 1:]
+
+def fine_end_of_start_end(index, rstr, start, end):#找到括号尾部index
+    count = 0
+    isFoundFirst = False
+    for i in range(index,len(rstr)):
+        s = rstr[i]
+        if s==start:
+            count+=1
+            isFoundFirst = True
+        elif s==end and isFoundFirst:
+            count-=1
+        if count==0 and isFoundFirst:
+            return i
+    return -1
+
+def fine_end_of_start_end2(index, rstr, start, startlen, end):#找到括号尾部index
+    count = 0
+    isFoundFirst = False
+    for i in range(index,len(rstr)):
+        s = rstr[i]
+        startstr = rstr[i:i+startlen]
+        if startstr==start:
+            count+=1
+            isFoundFirst = True
+        elif s==end and isFoundFirst:
+            count-=1
+        if count==0 and isFoundFirst:
+            return i
+    return -1
+    
+def iscontinueWith(startindex,rstr, char):
+    for i in range(startindex, len(rstr)):
+        s = rstr[i]
+        if s==' ' or s=='\n':
+            continue
+        elif s==char:
+            return True
+        else:
+            break
+    return False
+
+def handleIfElse(rstr):
+    willreplcacetoendlist = []
+    index = rstr.find('if')
+    while index != -1:
+        index+=2
+        
+        bindex = fine_end_of_start_end(index, rstr,'(',')')
+        rstr = replaceByIndex(rstr, bindex, ') then')
+        index = rstr.find('if', bindex)
+        
+    index = rstr.find('else')
+    while index != -1:
+        if iscontinueWith(index+4, rstr, '{'):
+            bindex = fine_end_of_start_end(index, rstr,'{','}')
+            assert(bindex!=-1)
+            willreplcacetoendlist.append(bindex)
+            index = rstr.find('else', index+1)
+        else:
+            index = rstr.find('else', index+1)
+
+    index = rstr.find('then')
+    while index != -1:#思路 找到then后面的括号匹配,难点：有点then后面没有括号，要排除
+        if iscontinueWith(index+4, rstr, '{'):
+            bindex = fine_end_of_start_end(index, rstr,'{','}')
+            assert(bindex!=-1)
+            if rstr[bindex+1]=='\n':
+                willreplcacetoendlist.append(bindex)
+            index = rstr.find('then', index+1)
+        else:
+            index = rstr.find('then', index+1)
+
+    for index in willreplcacetoendlist:
+        rstr = replaceByIndex(rstr, index, '#')
+
+    rstr = rstr.replace('else {','else')
+    rstr = rstr.replace(' then {',' then')
+    rstr = rstr.replace('} else','else')
+    rstr = rstr.replace('#','end ')
+
+    return rstr
+
 def main():
     global resultStr
     for index, line in enumerate(lines):
         resultStr += process(index,line, lines)
     
     resultStr = resultStr.replace(';','')
+    resultStr = resultStr.replace('//','--')
+    resultStr = resultStr.replace('.ToString()',':ToString()')
+    resultStr = resultStr.replace('new ','')
+    resultStr = resultStr.replace(' && ',' and ')
+    resultStr = resultStr.replace(' != ',' ~= ')
+    resultStr = resultStr.replace('!(','not(')
+    
+    resultStr = resultStr.replace('else if','elseif')
+
+    resultStr = handleIfElse(resultStr)
+
+    #resultStr = resultStr.replace(' then {',' then')
+    
+    
+
 
 
 main()
