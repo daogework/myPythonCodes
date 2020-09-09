@@ -1,4 +1,4 @@
-
+local CircleBroadcastMessage
 local CommonModule = {
     ctor = function(self)
         self.AutoRegister = true
@@ -170,7 +170,7 @@ local CommonModule = {
 
 --TODO 这里是do while,需要处理
         while (curTime <= endTime) do
-            circleBroadcastList.Add(CircleBroadcastMessage(msgId, curTime, message, rsp))
+            circleBroadcastList.Add(CircleBroadcastMessage.ctor(msgId, curTime, message, rsp))
             curTime = curTime + interval
         end
 
@@ -187,7 +187,7 @@ local CommonModule = {
     --#endregion
 }
 
-local CircleBroadcastMessage = {
+CircleBroadcastMessage = {
     Id = nil,
     Timestamp = nil,
     Message = nil,
@@ -198,5 +198,8 @@ local CircleBroadcastMessage = {
         self.Timestamp = timestamp
         self.Message = message
         self.Ntf = ntf
+		return self
     end,
 }
+
+

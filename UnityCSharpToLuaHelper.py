@@ -92,13 +92,15 @@ def process(index, line, lines):
     r = _class.parse(line)
     if not r is None:
         classname = r['classname']
-        return 'local '+classname+' = {\n'
+        print('local '+classname)
+        return classname+' = {\n'
         
     else:
         r = _class2.parse(line)
         if not r is None:
             classname = r['classname']
-            return 'local '+classname+' = {\n'
+            print('local '+classname)
+            return classname+' = {\n'
 
  
     r = paserFunc(line, _private_func, _private_funcpara)
