@@ -36,13 +36,13 @@ _fangkuohao = compile("{}<{typename}>(){}")
 _add_sum = compile("{space} {v1} += {v2};")
 
 
-
-fout = open('D:\\python脚本\\__fortest/out.lua', 'w')
+filename = 'CommonModule.cs'
+fout = open('D:\\python脚本\\__fortest/'+filename+'.lua', 'w')
 sys.stdout = fout
 
 total = 0
 scoreList = []
-filename = 'CommonModule.cs'
+
 rootpath = "H:\\fll3d_optimization\\client\\Plaza\\Assets\\Scripts\\GameLogic\\Module"
 path = rootpath + '/' + filename
 file = open(path,mode='r', encoding="utf-8")
