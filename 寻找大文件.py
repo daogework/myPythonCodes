@@ -71,16 +71,16 @@ class search():
 		size: number + KB/MB/GB
 		for example: "2GB+312MB+47KB"
 		"""
-		if isinstance(size,str):
-			s = size.split('+')
-			l = 0
-			while l < 3 - len(s):	
-				s.append('')
-				l += 1
-			GB = s[0]
-			MB = s[1]
-			KB = s[2]
-		self.__fileSize__ = self.__GB__ * int(GB[:-2]) + self.__MB__ * int(MB[:-2]) + self.__KB__ * int(KB[:-2])
+		# if isinstance(size,str):
+		# 	s = size.split('+')
+		# 	l = 0
+		# 	while l < 3 - len(s):	
+		# 		s.append('')
+		# 		l += 1
+		# 	GB = s[0]
+		# 	MB = s[1]
+		# 	KB = s[2]
+		# self.__fileSize__ = self.__GB__ * int(GB[:-2]) + self.__MB__ * int(MB[:-2]) + self.__KB__ * int(KB[:-2])
 
 	def findBigSizeFile(self):
 		files = self.sortFilesDirs()[0]
@@ -118,8 +118,8 @@ def walk2Find(path,size):
 			
 
 if __name__ == '__main__':
-	max_size = 90*1024*1024
-	bigFiles = walk2Find('H:\\fll3d_optimization',"0GB+90M+1KB")
+	max_size = 90*1024*1024 #文件大小在这里设置
+	bigFiles = walk2Find('H:\\fll3d_subGames',"")
 	#for f in bigFiles:
 	#	print (f)
 	
