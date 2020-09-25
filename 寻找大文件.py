@@ -119,7 +119,7 @@ def walk2Find(path,size):
 
 if __name__ == '__main__':
 	max_size = 90*1024*1024 #文件大小在这里设置
-	bigFiles = walk2Find('H:\\fll3d_subGames',"")
+	bigFiles = walk2Find('H:\\fll3d_server\\server',"")
 	#for f in bigFiles:
 	#	print (f)
 	
