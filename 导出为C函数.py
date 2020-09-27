@@ -10,7 +10,7 @@ _func2= compile("    {returntype} {funcname}();")
 printToFile = True
 
 filename = 'BaseCore.h'
-exprotPath = 'H:\\fll3d_server\\server\\gameserver\\GameDll'
+exprotPath = r'H:\fll3d_server\server\net\server\exportToC'
 
 if printToFile:
     fout = open(exprotPath+'/export_'+filename+'', 'w')
@@ -21,7 +21,7 @@ scoreList = []
 
 rootpath = "H:\\fll3d_server\\server\\gameserver\\base\\base"
 path = rootpath + '/' + filename
-file = open(path,mode='r', encoding="utf-8")
+file = open(path,mode='r')
 lines = file.readlines()
 
 resultStr = ''
@@ -30,7 +30,7 @@ isPrintResult = True
 
 cppfileStr = ''
 
-print('#pragma once\n #include"ExportDll.h"\n')
+print('#pragma once\n #include"exportToC.h"\n')
 
 def paserParam(paramstr):
     arr = str.split(paramstr, ',')
