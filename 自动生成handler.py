@@ -49,6 +49,7 @@ def paserParam(paramstr):
 
 print('#pragma once\n//以下是由.proto自动生成的代码')
 printToCpp('//以下是由.proto自动生成的代码\n#include "stdafx.h"')
+printToCpp('#include "model/user/UserDataComponent.h"')
 msgnameList = []
 pkgname = ''
 passCount = 0 #要跳过的次数
@@ -73,12 +74,33 @@ def process(index, line, lines):
     if not r is None:
         msgname = r['msgname']
         if 'Req' in msgname:
-            msgnameList.append(msgname)
+            t = {'msgname':msgname}
+            msgnameList.append(t)
+            paserProtoParam(index+1, lines, t)
             print(f'    static void on{pkgname}{msgname}(IUser* user, {pkgname}::{msgname}& proto);')
             
         return ''
     return ''
 
+def paserProtoParam(index, lines, t):
+    paramslist = t['params'] = []
+    _paser = compile("    {type} {name} = {}; {}")
+    for i in range(index, len(lines)):
+        line = lines[i]
+        isrepeated = False
+        if 'repeated ' in line:
+            isrepeated = True
+            line = line.replace('repeated ', '')
+        r = _paser.parse(line)
+        if not r is None:
+            t = {
+                'type':r['type'],
+                'name':r['name'],
+                'isrepeated':isrepeated,
+            }
+            paramslist.append(t)
+        if '}' in line:
+            break
 
 ##########################################
 
@@ -93,14 +115,29 @@ main()
 
 print('};')
 
-for msgname in msgnameList:#//init函数内容
+for t in msgnameList:#//init函数内容
+    msgname = t['msgname']
+    params = t['params']
     printToCpp(f'    mk::registerPBHandler<{pkgname}::{msgname}>(on{pkgname}{msgname});')
 printToCpp('}\n')
 
-for msgname in msgnameList:
+for t in msgnameList:
+    msgname = t['msgname']
+    params = t['params']
+    paramsstr = ''
+    for index, p in enumerate(params):
+        end = ''
+        if index != len(params)-1:
+            end = ', '
+        paramsstr += 'proto.' + p['name'].lower() + '()' + end
+
     printToCpp(f'void {pkgname}Handler::on{pkgname}{msgname}(IUser* user, {pkgname}::{msgname}& proto)')
     printToCpp('{')
-    printToCpp(f'    user->sendComponentMessage(\n    "UserDataComponent","process{msgname}", &proto);')
+    printToCpp('    auto com = user->getComponent<UserDataComponent>();')
+    if len(params)>0:
+        printToCpp(f'    com->process{msgname}({paramsstr});')
+    else:
+        printToCpp(f'    com->process{msgname}();')
     printToCpp('}\n')
 
 if printToFile:
