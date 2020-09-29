@@ -13,10 +13,10 @@ _func2= compile("    virtual {returntype} {funcname}() = 0;")
 printToFile = True
 
 filename = 'IUser.h'
-exprotPath = 'H:\\fll3d_server\\server\\gameserver\\GameDll'
+exportPath = 'H:\\fll3d_server\\server\\gameserver\\GameDll'
 
 if printToFile:
-    fout = open(exprotPath+'/export_'+filename+'', 'w')
+    fout = open(exportPath+'/export_'+filename+'', 'w')
     sys.stdout = fout
 
 total = 0
@@ -117,7 +117,7 @@ if isPrintResult:
 
 
 if printToFile:
-    fout = open(exprotPath+'/export_'+filename.replace('.h','.cpp')+'', 'w')
+    fout = open(exportPath+'/export_'+filename.replace('.h','.cpp')+'', 'w')
     sys.stdout = fout
 print('#include "export_IUser.h"\n#include"base/IUser.h"\n')
 print(cppfileStr)
