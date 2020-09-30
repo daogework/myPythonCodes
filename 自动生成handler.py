@@ -10,11 +10,11 @@ _message= compile("message {msgname}")
 
 printToFile = True
 
-filename = 'CLSHZ.proto'
+filename = 'CLZJH.proto'
 filenameRaw = os.path.splitext(filename)[0]
 fileExt = os.path.splitext(filename)[1]
 exportfilename = filenameRaw+'Handler'
-exportPath = r'H:\fll3d_server\server\gameserver\GameShz\handler'
+exportPath = r'H:\fll3d_server\server\gameserver\GameZJH\handler'
 frompath = r"H:\fll3d_support\protobuf\config"
 
 if printToFile:
