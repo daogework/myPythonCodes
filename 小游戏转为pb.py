@@ -2,6 +2,7 @@ from parse import compile
 from parse import findall
 import sys
 import os
+import time
 
 orig_stdout = sys.stdout
 
@@ -19,7 +20,7 @@ _message= compile("message {msgname}")
 
 printToFile = True
 
-gameBaseName = 'DDZ'
+gameBaseName = 'LMFZ'
 clname = 'CL'+gameBaseName
 filename = f'{clname}.proto'
 filenameRaw = os.path.splitext(filename)[0]
@@ -76,8 +77,6 @@ def process(index, line, lines):
     if passCount>0:
         passCount-=1
         return ''
-    #_package= compile("package {pkgname};") 
-    #_message= compile("message {msgname}")
     r = _package.parse(line)
     if not r is None:
         pkgname = r['pkgname']
@@ -159,8 +158,10 @@ for t in msgnameList:
 
 if printToFile:
     fout = open(exportPath+'/'+exportfilename+'.cpp', 'w')
-    sys.stdout = fout
-    print(cppfilestr)
+    sys.stdout = orig_stdout
+    fout.write(cppfilestr)
+    fout.flush()
+    fout.close()
 
 
 

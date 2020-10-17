@@ -36,14 +36,14 @@ _fangkuohao = compile("{}<{typename}>(){}")
 _add_sum = compile("{space} {v1} += {v2};")
 
 
-filename = 'CommonModule.cs'
-fout = open('D:\\python脚本\\__fortest/'+filename+'.lua', 'w')
+filename = 'HotUpdateUI.cs'
+fout = open('H:\\python脚本\\__fortest/'+filename+'.lua', 'w')
 sys.stdout = fout
 
 total = 0
 scoreList = []
 
-rootpath = "H:\\fll3d_optimization\\client\\Plaza\\Assets\\Scripts\\GameLogic\\Module"
+rootpath = r"H:\fll3d_plaza\client\Plaza\Assets\Scripts\GameLogic\UI"
 path = rootpath + '/' + filename
 file = open(path,mode='r', encoding="utf-8")
 lines = file.readlines()

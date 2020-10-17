@@ -19,7 +19,7 @@ _message= compile("message {msgname}")
 
 printToFile = True
 
-gameBaseName = 'DDZ'
+gameBaseName = 'LMFZ'
 clname = 'CL'+gameBaseName
 filename = f'{clname}.proto'
 filenameRaw = os.path.splitext(filename)[0]
@@ -87,6 +87,8 @@ def convertLines(lines):
     _func1 = compile('{returnvalue} {classname}::{funcname}({jbtype}& {param})')
     _func2 = compile('{space}{void} {funcname}({jbtype}& {param});')
     _func3 = compile('{space}void {funcname}({jbtype}& {param})')
+    _func4 = compile('{space}static void {funcname}({jbtype}& {param},{param2});')
+    _func5 = compile('void {classname}::{funcname}({jbtype}& {param},{param2})')
     _memcpy = compile('{space}memcpy({pb}.{value1}, {value2}, {size});')
     skiplinecount = 0
     for index, line in enumerate(lines):
@@ -128,6 +130,13 @@ def convertLines(lines):
                 handleMemcpy(r)
                 continue
         if clname in line:
+            r = _func5.parse(line)
+            if not r is None:
+                line = line.replace(clname,clname+'::').replace('&','*')
+                print(line.replace('\n',''))
+                param = r['param']
+                skiplinecount = paserFunc(param, index, lines, _memcpy, skiplinecount)
+                continue
             r = _func1.parse(line)
             if not r is None:
                 line = line.replace(clname,clname+'::').replace('&','*')
@@ -148,6 +157,12 @@ def convertLines(lines):
                 param = r['param']
                 skiplinecount = paserFunc(param, index, lines, _memcpy, skiplinecount)
                 continue
+            r = _func4.parse(line)
+            if not r is None:
+                line = line.replace(clname,clname+'::').replace('&','*')
+                print(line.replace('\n',''))
+                continue
+            
             
         print(line.replace('\n','').replace(' max(',' std::max('))
 
@@ -170,13 +185,13 @@ filepathList = [
     # gameRootName + f'/model/{gameBaseName}/{gameBaseName}Controller.h',
     # gameRootName + f'/model/{gameBaseName}/{gameBaseName}Controller.cpp',
 
-    gameRootName + f'/model/{gameBaseName}/{gameBaseName}StateDispatching.h',
-    gameRootName + f'/model/{gameBaseName}/{gameBaseName}StateDispatching.cpp',
+    # gameRootName + f'/model/{gameBaseName}/{gameBaseName}StateDispatching.h',
+    # gameRootName + f'/model/{gameBaseName}/{gameBaseName}StateDispatching.cpp',
     # gameRootName + f'/model/Packet/Packet.cpp',
-    # gameRootName + f'/model/Robot/RobotComponent.h',
-    # gameRootName + f'/model/Robot/RobotComponent.cpp',
-    # gameRootName + f'/model/match/matchhelper.h',
-    # gameRootName + f'/model/match/matchhelper.cpp',
+    gameRootName + f'/model/room/room.h',
+    gameRootName + f'/model/room/room.cpp',
+    # gameRootName + f'/model/CommonHelper.h',
+    # gameRootName + f'/model/CommonHelper.cpp',
 ]
 
 batchConvert(filepathList)
